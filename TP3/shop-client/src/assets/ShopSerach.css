@@ -1,0 +1,127 @@
+/* Global Styles */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Container */
+  .shop-search-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Header */
+  .shop-search-header {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #607d8b;
+    margin-bottom: 1rem;
+  }
+  
+  /* Search Inputs */
+  .shop-search-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .shop-search-input,
+  .shop-search-select,
+  .shop-search-button {
+    padding: 0.8rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  
+  .shop-search-input:focus,
+  .shop-search-select:focus {
+    outline: none;
+    border-color: #607d8b;
+    box-shadow: 0 0 3px rgba(96, 125, 139, 0.5);
+  }
+  
+  .shop-search-button {
+    background-color: #607d8b;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .shop-search-button:hover {
+    background-color: #455a64;
+  }
+  
+  /* Error Message */
+  .shop-search-error {
+    color: #d32f2f;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+  }
+  
+  /* Table */
+  .shop-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+  }
+  
+  .shop-table th,
+  .shop-table td {
+    text-align: left;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+  }
+  
+  .shop-table th {
+    background-color: #607d8b;
+    color: #fff;
+  }
+  
+  .shop-table tr:nth-child(odd) {
+    background-color: #f9f9f9;
+  }
+  
+  .shop-table tr:nth-child(even) {
+    background-color: #ffffff;
+  }
+  
+  /* Pagination */
+  .shop-pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .shop-pagination button {
+    background-color: #ddd;
+    color: #333;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .shop-pagination button:hover {
+    background-color: #607d8b;
+    color: #fff;
+  }
+  
+  .shop-pagination button:disabled {
+    background-color: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+  }
+  

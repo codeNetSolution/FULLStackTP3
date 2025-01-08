@@ -1,0 +1,74 @@
+{
+    "name": "shop-client",
+    "version": "0.1.1",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite --port 4200 --host",
+        "build": "vite build",
+        "preview": "vite preview",
+        "test": "react-scripts test",
+        "lint": "eslint --ext js,ts,tsx src"
+    },
+    "eslintConfig": {
+        "extends": [
+            "react-app",
+            "react-app/jest"
+        ]
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "devDependencies": {
+        "@cypress/react": "^9.0.0",
+        "@cypress/vite-dev-server": "^6.0.0",
+        "@playwright/test": "^1.49.1",
+        "@testing-library/jest-dom": "^6.6.3",
+        "@testing-library/react": "^16.1.0",
+        "@testing-library/user-event": "^14.5.2",
+        "@types/jest": "^29.5.14",
+        "@types/moment": "^2.13.0",
+        "@types/node": "^22.10.5",
+        "@types/react": "^19.0.3",
+        "@types/react-dom": "^19.0.2",
+        "@types/react-router-dom": "^5.3.3",
+        "@types/react-select": "^5.0.1",
+        "@typescript-eslint/eslint-plugin": "^8.19.1",
+        "@typescript-eslint/parser": "^8.19.1",
+        "@vitejs/plugin-react": "^4.3.4",
+        "@vitest/ui": "^2.1.8",
+        "autoprefixer": "^10.4.20",
+        "cypress": "^13.17.0",
+        "eslint": "^9.17.0",
+        "eslint-plugin-prettier": "^5.2.1",
+        "eslint-plugin-react": "^7.37.3",
+        "eslint-plugin-react-hooks": "^5.1.0",
+        "jsdom": "^25.0.1",
+        "postcss": "^8.4.49",
+        "tailwindcss": "^3.4.17",
+        "vite": "^6.0.7",
+        "vitest": "^2.1.8"
+    },
+    "dependencies": {
+        "@emotion/react": "^11.14.0",
+        "@emotion/styled": "^11.14.0",
+        "@mui/icons-material": "^6.3.1",
+        "@mui/material": "^6.3.1",
+        "@mui/x-date-pickers": "^7.23.3",
+        "axios": "^1.7.9",
+        "dayjs": "^1.11.13",
+        "moment": "^2.30.1",
+        "react-router-dom": "^7.1.1",
+        "react-select": "^5.9.0",
+        "react-select-async-paginate": "^0.7.9"
+    }
+}

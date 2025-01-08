@@ -1,0 +1,78 @@
+
+services:
+  db:
+    container_name: shop-db
+    image: postgres:15
+    hostname: "psql_docker"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1234"
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+      - ./shop-server/sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      - ./shop-server/sql/fill_tables.sql:/docker-entrypoint-initdb.d/fill_tables.sql
+    networks:
+      - postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+  elasticsearch:
+    container_name: shop-elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.13
+    hostname: "elasticsearch_docker"
+    environment:
+      - discovery.type=single-node
+      - network.host=0.0.0.0
+      - http.host=0.0.0.0
+      - xpack.security.enabled=false
+      - cluster.name=docker-cluster
+      - node.name=elasticsearch-node
+      
+    ports:
+      - "9200:9200"
+    networks:
+      - postgres
+    healthcheck:
+        test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
+        interval: 30s
+        timeout: 20s
+        retries: 10
+        start_period: 60s
+
+  api:
+    depends_on:
+      db:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    container_name: shop-server
+    build: ./shop-server
+    ports:
+      - "8080:8080"
+    networks:
+      - postgres
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=1234
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - ES_URL=elasticsearch:9200
+
+  front:
+    container_name: shop-client
+    build: ./shop-client
+    ports:
+      - "4200:4200"
+
+networks:
+  postgres:
+    driver: bridge
+
+volumes:
+  postgres:
