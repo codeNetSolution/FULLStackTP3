@@ -27,6 +27,9 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.*;
 
+import fr.fullstack.shopapp.util.ShopDetailsProjection;
+
+
 @Service
 public class ShopService {
     @PersistenceContext
@@ -39,10 +42,7 @@ public class ShopService {
     private ShopElasticsearchRepository shopElasticsearchRepository;
 
     public List<ShopElestack> searchShops(String name, Boolean inVacations, LocalDate startDate, LocalDate endDate) {
-        Logger logger = LoggerFactory.getLogger(ShopService.class);
-
         if ((name == null || name.isEmpty()) && inVacations == null && startDate == null && endDate == null) {
-            logger.debug("No criteria provided, returning all shops.");
             List<ShopElestack> results = new ArrayList<>();
             shopElasticsearchRepository.findAll().forEach(results::add);
             return results;
@@ -319,5 +319,25 @@ public class ShopService {
             }
         }
     }
+
+    public Page<ShopDetailsProjection> getShopDetails(Pageable pageable) {
+        return shopRepository.findShopDetails(pageable);
+    }
+
+    public List<Shop> searchShopsFilter(String name) {
+        if ((name == null || name.isEmpty())) {
+            List<Shop> results = new ArrayList<>();
+            shopRepository.findAll().forEach(results::add);
+            return results;
+        }
+        Set<Shop> finalResults = null;
+        String[] terms = name.split("\\s+");
+        String lastTerm = terms[terms.length - 1];
+        List<Shop> termResults = shopRepository.findByNameContaining(lastTerm);
+        finalResults = new HashSet<>(termResults);
+
+        return new ArrayList<>(finalResults);
+    }
+
 
 }

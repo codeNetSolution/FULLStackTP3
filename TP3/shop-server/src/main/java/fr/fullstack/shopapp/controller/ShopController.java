@@ -31,6 +31,8 @@ import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import fr.fullstack.shopapp.util.ShopDetailsProjection;
+
 
 @RestController
 @RequestMapping("/api/v1/shops")
@@ -123,4 +125,22 @@ public class ShopController {
         List<ShopElestack> results = service.searchShops(name, inVacations, startDate, endDate);
         return ResponseEntity.ok(results);
     }
+
+    @GetMapping("/details")
+    public ResponseEntity<Page<ShopDetailsProjection>> getShopDetails(Pageable pageable) {
+        return ResponseEntity.ok(service.getShopDetails(pageable));
+    }
+
+    @Operation(summary = "search shops")
+    @GetMapping("/searchBoutique")
+    public ResponseEntity<List<Shop>> searchShopsFilter(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Boolean inVacations,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        List<Shop> results = service.searchShopsFilter(name);
+        return ResponseEntity.ok(results);
+    }
+
 }

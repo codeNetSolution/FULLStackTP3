@@ -9,8 +9,11 @@ import {
     Select,
     SelectChangeEvent,
     Typography,
+    TextField,
+    Button,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Filters, ShopCard } from '../components';
@@ -29,28 +32,43 @@ const Home = () => {
     const [sort, setSort] = useState<string>('');
     const [filters, setFilters] = useState<string>('');
 
+    // Barre de recherche
+    const [searchName, setSearchName] = useState<string>('');
+
     const getShops = () => {
         setLoading(true);
+      
         let promisedShops: Promise<ResponseArray<Shop>>;
-        if (sort) {
-            promisedShops = ShopService.getShopsSorted(pageSelected, 9, sort);
+      
+        if (searchName.trim() !== '') {
+          promisedShops = ShopService.searchShopsFilter(searchName); 
+        } else if (sort) {
+          promisedShops = ShopService.getShopsSorted(pageSelected, 9, sort);
         } else if (filters) {
-            promisedShops = ShopService.getShopsFiltered(pageSelected, 9, filters);
+          promisedShops = ShopService.getShopsFiltered(pageSelected, 9, filters);
         } else {
-            promisedShops = ShopService.getShops(pageSelected, 9);
+          promisedShops = ShopService.getShops(pageSelected, 9);
         }
+      
         promisedShops
-            .then((res) => {
-                setShops(res.data.content);
-                setCount(res.data.totalPages);
-                setPage(res.data.pageable.pageNumber + 1);
-            })
-            .finally(() => setLoading(false));
-    };
+          .then((res) => {
+            setShops(res.data.content);
+            setCount(res.data.totalPages);
+            setPage(res.data.pageable.pageNumber + 1);
+          })
+          .finally(() => setLoading(false));
+      };
+      
+    
 
     useEffect(() => {
         getShops();
     }, [pageSelected, sort, filters]);
+
+    const handleSearch = () => {
+        setPageSelected(0); 
+        getShops();
+    };
 
     const handleChangePagination = (event: React.ChangeEvent<unknown>, value: number) => {
         setPageSelected(value - 1);
@@ -69,9 +87,30 @@ const Home = () => {
                     width: '100%',
                     display: 'flex',
                     flexDirection: 'row',
-                    justifyContent: 'flex-end',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 2,
                 }}
             >
+                {/* Barre de recherche */}
+                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+                    <TextField
+                        label="Rechercher une boutique"
+                        variant="outlined"
+                        value={searchName}
+                        onChange={(e) => setSearchName(e.target.value)}
+                        size="small"
+                    />
+                    <Button
+                        variant="contained"
+                        startIcon={<SearchIcon />}
+                        onClick={handleSearch}
+                        sx={{ height: '40px' }}
+                    >
+                        Rechercher
+                    </Button>
+                </Box>
+
                 <Fab variant="extended" color="primary" aria-label="add" onClick={() => navigate('/shop/create')}>
                     <AddIcon sx={{ mr: 1 }} />
                     Ajouter une boutique

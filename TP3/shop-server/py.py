@@ -54,7 +54,6 @@ ANNOTATION_REPLACEMENTS = [
 
     (r'(@Parameter\([^)]*?),\s*example\s*=\s*"(.*?)",\s*example\s*=\s*"(.*?)"', r'\1, example = "\2"')
 
-
 ]
 
 

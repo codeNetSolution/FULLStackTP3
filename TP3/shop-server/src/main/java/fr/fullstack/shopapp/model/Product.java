@@ -1,17 +1,6 @@
 package fr.fullstack.shopapp.model;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -23,13 +12,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "products")
+@Table(name = "products", indexes = {
+        @Index(name = "idx_products_shop_id", columnList = "shop_id"),
+        @Index(name = "idx_products_price", columnList = "price")
+})
 public class Product {
     @ManyToMany
-    @JoinTable(
-            name = "products_categories",
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id"))
+    @JoinTable(name = "products_categories",
+            joinColumns = @JoinColumn(name = "product_id", foreignKey = @ForeignKey(name = "FK_products_categories_product_id")),
+            inverseJoinColumns = @JoinColumn(name = "category_id", foreignKey = @ForeignKey(name = "FK_products_categories_category_id")),
+            indexes = {
+                    @Index(name = "idx_products_categories_product_id", columnList = "product_id"),
+                    @Index(name = "idx_products_categories_category_id", columnList = "category_id")
+            })
     private List<Category> categories = new ArrayList<Category>();
 
     @Id

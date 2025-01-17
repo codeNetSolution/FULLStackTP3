@@ -47,3 +47,51 @@ export const searchShops = async (
     const response = await axios.get<Shop[]>(`${import.meta.env.REACT_APP_API}/shops/search`, { params });
     return response.data;
   };
+
+  
+  export const searchShopsFilter = async (
+    name?: string,
+    inVacations?: boolean,
+    startDate?: string,
+    endDate?: string
+  ): Promise<ResponseArray<Shop>> => {
+    const params: any = {};
+    if (name) params.name = name;
+    if (inVacations !== undefined) params.inVacations = inVacations;
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+  
+    const response = await axios.get<Shop[]>(`${import.meta.env.REACT_APP_API}/shops/searchBoutique`, { params });
+    return {
+      status: 200, 
+      data: {
+        content: response.data,
+        pageable: {
+          sort: {
+            empty: true,
+            sorted: false,
+            unsorted: true,
+          },
+          offset: 0,
+          pageNumber: 0,
+          pageSize: response.data.length,
+          paged: true,
+          unpaged: false,
+        },
+        last: true,
+        totalPages: 1,
+        totalElements: response.data.length,
+        size: response.data.length,
+        number: 0,
+        sort: {
+          empty: true,
+          sorted: false,
+          unsorted: true,
+        },
+        first: true,
+        numberOfElements: response.data.length,
+        empty: response.data.length === 0,
+      },
+    };
+  };
+  

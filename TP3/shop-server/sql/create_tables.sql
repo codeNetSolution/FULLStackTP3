@@ -84,3 +84,22 @@ add constraint FKti43xlm3mfbeodhgi4qn1yhgw foreign key (opening_hours_id) refere
 
 alter table shops_opening_hours
 add constraint FK8dcjdnasobclsvyy8wjfki7gj foreign key (shop_id) references shops;
+
+CREATE INDEX idx_products_shop_id ON products (shop_id);
+CREATE INDEX idx_products_categories_product_id ON products_categories (product_id);
+CREATE INDEX idx_products_categories_category_id ON products_categories (category_id);
+CREATE INDEX idx_shops_opening_hours_shop_id ON shops_opening_hours (shop_id);
+CREATE INDEX idx_shops_opening_hours_opening_hours_id ON shops_opening_hours (opening_hours_id);
+CREATE INDEX idx_products_localized_product_product_id ON products_localized_product (product_id);
+CREATE INDEX idx_products_localized_product_localized_product_id ON products_localized_product (localized_product_id);
+
+CREATE INDEX idx_products_price ON products (price);
+CREATE INDEX idx_categories_name ON categories (name);
+CREATE INDEX idx_opening_hours_day ON opening_hours (day);
+CREATE INDEX idx_localized_product_locale ON localized_product (locale);
+CREATE INDEX idx_shops_name ON shops (name);
+CREATE INDEX idx_shops_created_at ON shops (created_at);
+
+CREATE INDEX idx_products_categories ON products_categories (product_id, category_id);
+CREATE INDEX idx_products_localized_product ON products_localized_product (product_id, localized_product_id);
+CREATE INDEX idx_shops_opening_hours ON shops_opening_hours (shop_id, opening_hours_id);
