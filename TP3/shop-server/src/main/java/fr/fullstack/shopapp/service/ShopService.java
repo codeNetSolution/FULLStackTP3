@@ -10,6 +10,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
 import org.hibernate.search.mapper.orm.Search;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -23,9 +25,7 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ShopService {
@@ -39,39 +39,58 @@ public class ShopService {
     private ShopElasticsearchRepository shopElasticsearchRepository;
 
     public List<ShopElestack> searchShops(String name, Boolean inVacations, LocalDate startDate, LocalDate endDate) {
-        // Si aucun critère n'est fourni
+        Logger logger = LoggerFactory.getLogger(ShopService.class);
+
         if ((name == null || name.isEmpty()) && inVacations == null && startDate == null && endDate == null) {
-            return new ArrayList<>();
+            logger.debug("No criteria provided, returning all shops.");
+            List<ShopElestack> results = new ArrayList<>();
+            shopElasticsearchRepository.findAll().forEach(results::add);
+            return results;
         }
-        if ((inVacations == null && startDate == null && endDate == null) && name != null && !name.isEmpty()) {
-            return shopElasticsearchRepository.findByNameContaining(name);
+
+        Set<ShopElestack> finalResults = null;
+
+        if (name != null && !name.isEmpty()) {
+            String[] terms = name.split("\\s+");
+            String lastTerm = terms[terms.length - 1];
+            List<ShopElestack> termResults = shopElasticsearchRepository.findByNameContaining(lastTerm);
+            finalResults = new HashSet<>(termResults);
         }
-        if ((name == null || name.isEmpty()) && startDate == null && endDate == null) {
-            return shopElasticsearchRepository.findByInVacations(inVacations);
-        }
-        if (name == null || name.isEmpty()) {
-            if (startDate == null) {
-                return shopElasticsearchRepository.findByInVacationsAndCreatedAtBefore(inVacations, endDate);
-            } else if (endDate == null) {
-                return shopElasticsearchRepository.findByInVacationsAndCreatedAtAfter(inVacations, startDate);
+        if (inVacations != null || startDate != null || endDate != null) {
+            List<ShopElestack> criteriaResults = new ArrayList<>();
+
+            if (inVacations != null) {
+                if (startDate == null && endDate == null) {
+                    criteriaResults = shopElasticsearchRepository.findByInVacations(inVacations);
+                } else if (startDate == null) {
+                    criteriaResults = shopElasticsearchRepository.findByInVacationsAndCreatedAtBefore(inVacations, endDate);
+                } else if (endDate == null) {
+                    criteriaResults = shopElasticsearchRepository.findByInVacationsAndCreatedAtAfter(inVacations, startDate);
+                } else {
+                    criteriaResults = shopElasticsearchRepository.findByInVacationsAndCreatedAtBetween(inVacations, startDate, endDate);
+                }
             } else {
-                return shopElasticsearchRepository.findByInVacationsAndCreatedAtBetween(inVacations, startDate, endDate);
+                if (startDate == null) {
+                    criteriaResults.addAll(shopElasticsearchRepository.findByInVacationsAndCreatedAtBefore(true, endDate));
+                    criteriaResults.addAll(shopElasticsearchRepository.findByInVacationsAndCreatedAtBefore(false, endDate));
+                } else if (endDate == null) {
+                    criteriaResults.addAll(shopElasticsearchRepository.findByInVacationsAndCreatedAtAfter(true, startDate));
+                    criteriaResults.addAll(shopElasticsearchRepository.findByInVacationsAndCreatedAtAfter(false, startDate));
+                } else {
+                    criteriaResults.addAll(shopElasticsearchRepository.findByInVacationsAndCreatedAtBetween(true, startDate, endDate));
+                    criteriaResults.addAll(shopElasticsearchRepository.findByInVacationsAndCreatedAtBetween(false, startDate, endDate));
+                }
+            }
+            if (finalResults == null) {
+                finalResults = new HashSet<>(criteriaResults);
+            } else {
+                finalResults.retainAll(criteriaResults);
             }
         }
-
-        // Si le nom est fourni avec d'autres paramètres
-        if (startDate == null && endDate == null) {
-            return shopElasticsearchRepository.findByInVacationsAndNameContaining(inVacations, name);
-        }
-
-        if (startDate == null) {
-            return shopElasticsearchRepository.findByInVacationsAndNameContainingAndCreatedAtBefore(inVacations, name, endDate);
-        } else if (endDate == null) {
-            return shopElasticsearchRepository.findByInVacationsAndNameContainingAndCreatedAtAfter(inVacations, name, startDate);
-        } else {
-            return shopElasticsearchRepository.findByInVacationsAndNameContainingAndCreatedAtBetween(inVacations, name, startDate, endDate);
-        }
+        List<ShopElestack> resultList = finalResults == null ? new ArrayList<>() : new ArrayList<>(finalResults);
+        return resultList;
     }
+
 
 
 

@@ -91,6 +91,18 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.elasticsearch.client</groupId>
+			<artifactId>elasticsearch-rest-high-level-client</artifactId>
+			<version>7.17.27</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-elasticsearch</artifactId>
+			<version>5.4.1</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.hibernate.search</groupId>
 			<artifactId>hibernate-search-mapper-orm</artifactId>
 			<version>7.2.2.Final</version>

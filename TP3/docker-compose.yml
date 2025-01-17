@@ -33,7 +33,9 @@ services:
       - xpack.security.enabled=false
       - cluster.name=docker-cluster
       - node.name=elasticsearch-node
-      
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     ports:
       - "9200:9200"
     networks:

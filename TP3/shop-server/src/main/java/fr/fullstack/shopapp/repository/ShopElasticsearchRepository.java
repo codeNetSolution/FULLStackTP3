@@ -1,12 +1,14 @@
 package fr.fullstack.shopapp.repository;
 
 import fr.fullstack.shopapp.model.ShopElestack;
+import org.springframework.data.elasticsearch.annotations.Query;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 import java.time.LocalDate;
 import java.util.List;
 
 public interface ShopElasticsearchRepository extends ElasticsearchRepository<ShopElestack, Long> {
+
     List<ShopElestack> findByNameContaining(String name);
 
     List<ShopElestack> findByInVacations(boolean inVacations);
