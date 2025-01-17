@@ -95,3 +95,11 @@ export const searchShops = async (
     };
   };
   
+
+
+export const getDistinctCategoryCount= async (shopId: number): Promise<number> => {
+    const response = await axios.get<number>(
+        `${import.meta.env.REACT_APP_API}/shops/${shopId}/distinct-categories`
+    );
+    return response.data;
+};

@@ -103,3 +103,29 @@ CREATE INDEX idx_shops_created_at ON shops (created_at);
 CREATE INDEX idx_products_categories ON products_categories (product_id, category_id);
 CREATE INDEX idx_products_localized_product ON products_localized_product (product_id, localized_product_id);
 CREATE INDEX idx_shops_opening_hours ON shops_opening_hours (shop_id, opening_hours_id);
+
+-- Création d'une séquence pour chaque table
+CREATE SEQUENCE categories_id_seq;
+ALTER TABLE categories ALTER COLUMN id SET DEFAULT NEXTVAL('categories_id_seq');
+
+CREATE SEQUENCE localized_product_id_seq;
+ALTER TABLE localized_product ALTER COLUMN id SET DEFAULT NEXTVAL('localized_product_id_seq');
+
+CREATE SEQUENCE opening_hours_id_seq;
+ALTER TABLE opening_hours ALTER COLUMN id SET DEFAULT NEXTVAL('opening_hours_id_seq');
+
+CREATE SEQUENCE products_id_seq;
+ALTER TABLE products ALTER COLUMN id SET DEFAULT NEXTVAL('products_id_seq');
+
+CREATE SEQUENCE shops_id_seq;
+ALTER TABLE shops ALTER COLUMN id SET DEFAULT NEXTVAL('shops_id_seq');
+
+CREATE SEQUENCE translation_id_seq;
+ALTER TABLE translation ALTER COLUMN id SET DEFAULT NEXTVAL('translation_id_seq');
+
+SELECT setval('categories_id_seq', COALESCE((SELECT MAX(id) FROM categories), 1), false);
+SELECT setval('localized_product_id_seq', COALESCE((SELECT MAX(id) FROM localized_product), 1), false);
+SELECT setval('opening_hours_id_seq', COALESCE((SELECT MAX(id) FROM opening_hours), 1), false);
+SELECT setval('products_id_seq', COALESCE((SELECT MAX(id) FROM products), 1), false);
+SELECT setval('shops_id_seq', COALESCE((SELECT MAX(id) FROM shops), 1), false);
+SELECT setval('translation_id_seq', COALESCE((SELECT MAX(id) FROM translation), 1), false);

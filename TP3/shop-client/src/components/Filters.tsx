@@ -20,6 +20,8 @@ type FiltersType = {
     inVacations: string;
     createdAfter: Dayjs | null;
     createdBefore: Dayjs | null;
+    minProducts?: number | null;
+    distinctCategories: string;
 };
 
 const transformFiltersToURL = (filters: FiltersType): string => {
@@ -50,6 +52,8 @@ const Filters = ({ setUrlFilters, setSort, sort }: Props) => {
         inVacations: '',
         createdAfter: null,
         createdBefore: null,
+        minProducts:null,
+        distinctCategories: '',
     };
     const [open, setOpen] = useState<boolean>(false);
     const [filters, setFilters] = useState<FiltersType>(defaultFilters);
@@ -70,7 +74,7 @@ const Filters = ({ setUrlFilters, setSort, sort }: Props) => {
         setFilters(defaultFilters);
     };
 
-    const handleChange = (key: string, value: string | Dayjs | undefined | null) =>
+    const handleChange = (key: string, value: string | number | Dayjs | undefined | null) =>
         setFilters({ ...filters, [key]: value });
 
     const handleValidate = () => {
@@ -87,6 +91,26 @@ const Filters = ({ setUrlFilters, setSort, sort }: Props) => {
 
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>Filtrer les boutiques</DialogTitle>
+
+                <DialogContent>
+                    <TextField
+                        label="Nombre minimum de catégories distinctes"
+                        type="number"
+                        fullWidth
+                        value={filters.distinctCategories}
+                        onChange={(e) => handleChange('distinctCategories', e.target.value)}
+                    />
+                </DialogContent>
+
+                <DialogContent>
+                    <TextField
+                        label="Nombre minimum de produits"
+                        type="number"
+                        fullWidth
+                        value={filters.minProducts || ''}
+                        onChange={(e) => handleChange('minProducts', e.target.value ? parseInt(e.target.value) : null)}
+                    />
+                </DialogContent>
 
                 <DialogContent>
                     <FormControl fullWidth sx={{ marginTop: 2 }}>

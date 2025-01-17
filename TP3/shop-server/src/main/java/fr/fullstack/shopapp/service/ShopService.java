@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import fr.fullstack.shopapp.model.Category;
 import fr.fullstack.shopapp.util.ShopDetailsProjection;
 
 
@@ -133,10 +136,9 @@ public class ShopService {
                     "Erreur de validation des horaires d'ouverture : " + e.getMessage()
             );
         } catch (DataIntegrityViolationException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Conflit d'intégrité des données : " + e.getMessage()
-            );
+            synchronizeSequence("shops", "shops_id_seq");
+            return createShop(shop);
+
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
@@ -173,8 +175,11 @@ public class ShopService {
             Optional<Boolean> inVacations,
             Optional<String> createdBefore,
             Optional<String> createdAfter,
+            Optional<Integer> distinctCategories,
+            Optional<Integer> minProducts,
             Pageable pageable
     ) {
+
         // SORT
         if (sortBy.isPresent()) {
             switch (sortBy.get()) {
@@ -182,13 +187,28 @@ public class ShopService {
                     return shopRepository.findByOrderByNameAsc(pageable);
                 case "createdAt":
                     return shopRepository.findByOrderByCreatedAtAsc(pageable);
-                default:
+                case "distinctCategories":
+                    List<Shop> allShops = shopRepository.findAll();
+                    allShops.sort(Comparator.comparingInt(shop -> shop.getProducts().stream()
+                            .flatMap(product -> product.getCategories().stream())
+                            .map(Category::getId)
+                            .distinct()
+                            .toList()
+                            .size()));
+
+                    int start = (int) pageable.getOffset();
+                    int end = Math.min((start + pageable.getPageSize()), allShops.size());
+                    return new PageImpl<>(allShops.subList(start, end), pageable, allShops.size());
+
+                case "nbProducts":
                     return shopRepository.findByOrderByNbProductsAsc(pageable);
+                default:
+                    return shopRepository.findByOrderByIdAsc(pageable);
             }
         }
 
         // FILTERS
-        Page<Shop> shopList = getShopListWithFilter(inVacations, createdBefore, createdAfter, pageable);
+        Page<Shop> shopList = getShopListWithFilter(inVacations, createdBefore, createdAfter, distinctCategories,minProducts, pageable);
         if (shopList != null) {
             return shopList;
         }
@@ -223,10 +243,8 @@ public class ShopService {
                     "Erreur de validation des horaires d'ouverture : " + e.getMessage()
             );
         } catch (DataIntegrityViolationException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Conflit d'intégrité des données : " + e.getMessage()
-            );
+            synchronizeSequence("shops", "shops_id_seq");
+            return updateShop(shop);
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
@@ -258,8 +276,11 @@ public class ShopService {
             Optional<Boolean> inVacations,
             Optional<String> createdAfter,
             Optional<String> createdBefore,
+            Optional<Integer> distinctCategories,
+            Optional<Integer> minProducts,
             Pageable pageable
     ) {
+        List<Shop> allShops = shopRepository.findAll();
         if (inVacations.isPresent() && createdBefore.isPresent() && createdAfter.isPresent()) {
             return shopRepository.findByInVacationsAndCreatedAtGreaterThanAndCreatedAtLessThan(
                     inVacations.get(),
@@ -303,6 +324,31 @@ public class ShopService {
             );
         }
 
+        if (distinctCategories.isPresent()) {
+            int minCategories = distinctCategories.get();
+            allShops = allShops.stream()
+                    .filter(shop -> shop.getProducts().stream()
+                            .flatMap(product -> product.getCategories().stream())
+                            .map(Category::getId)
+                            .distinct()
+                            .count() >= minCategories)
+                    .collect(Collectors.toList());
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min(start + pageable.getPageSize(), allShops.size());
+            return new PageImpl<>(allShops.subList(start, end), pageable, allShops.size());
+        }
+
+        if (minProducts.isPresent()) {
+            allShops = allShops.stream()
+                    .filter(shop -> shop.getProducts().size() >= minProducts.get())
+                    .toList();
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min(start + pageable.getPageSize(), allShops.size());
+            return new PageImpl<>(allShops.subList(start, end), pageable, allShops.size());
+        }
+
         return null;
     }
 
@@ -339,5 +385,25 @@ public class ShopService {
         return new ArrayList<>(finalResults);
     }
 
+    public int getDistinctCategoryCount(Long shopId) throws Exception {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new Exception("Shop with id " + shopId + " not found"));
+
+        // Calculate distinct categories
+        return shop.getProducts().stream()
+                .flatMap(product -> product.getCategories().stream())
+                .map(Category::getId)
+                .distinct()
+                .toList()
+                .size();
+    }
+
+    private void synchronizeSequence(String tableName, String sequenceName) {
+        String sql = String.format(
+                "SELECT setval('%s', COALESCE((SELECT MAX(id) FROM %s), 1) + 1, false);",
+                sequenceName, tableName
+        );
+        em.createNativeQuery(sql).executeUpdate();
+    }
 
 }

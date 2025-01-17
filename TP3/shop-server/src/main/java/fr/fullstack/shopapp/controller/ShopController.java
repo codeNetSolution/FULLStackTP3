@@ -80,12 +80,14 @@ public class ShopController {
             @Parameter(description = "Define that the shops must be created after this date")
             @RequestParam(required = false) Optional<String> createdAfter,
             @Parameter(description = "Define that the shops must be created before this date", example = "2022-11-15")
-            @RequestParam(required = false) Optional<String> createdBefore
+            @RequestParam(required = false) Optional<String> createdBefore,
+            @RequestParam(required = false) Optional<Integer> distinctCategories,
+            @RequestParam(required = false) Optional<Integer> minProducts
 
     ) {
 
         return ResponseEntity.ok(
-                service.getShopList(sortBy, inVacations, createdAfter, createdBefore, pageable)
+                service.getShopList(sortBy, inVacations, createdAfter, createdBefore,distinctCategories, minProducts, pageable)
         );
     }
 
@@ -141,6 +143,16 @@ public class ShopController {
     ) {
         List<Shop> results = service.searchShopsFilter(name);
         return ResponseEntity.ok(results);
+    }
+
+    @GetMapping("/{shopId}/distinct-categories")
+    public ResponseEntity<Integer> getDistinctCategoryCount(@PathVariable Long shopId) {
+        try {
+            int count = service.getDistinctCategoryCount(shopId);
+            return ResponseEntity.ok(count);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
 }

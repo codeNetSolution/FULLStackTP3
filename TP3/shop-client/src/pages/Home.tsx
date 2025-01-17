@@ -31,18 +31,21 @@ const Home = () => {
 
     const [sort, setSort] = useState<string>('');
     const [filters, setFilters] = useState<string>('');
-
-    // Barre de recherche
     const [searchName, setSearchName] = useState<string>('');
+
+    const [distinctCategories, setDistinctCategories] = useState<number | null>(null);
+
 
     const getShops = () => {
         setLoading(true);
-      
         let promisedShops: Promise<ResponseArray<Shop>>;
       
         if (searchName.trim() !== '') {
           promisedShops = ShopService.searchShopsFilter(searchName); 
-        } else if (sort) {
+        }else if (sort === 'distinctCategories') {
+            promisedShops = ShopService.getShopsSorted(pageSelected, 9, 'distinctCategories');
+        } 
+        else if (sort) {
           promisedShops = ShopService.getShopsSorted(pageSelected, 9, sort);
         } else if (filters) {
           promisedShops = ShopService.getShopsFiltered(pageSelected, 9, filters);
@@ -76,6 +79,13 @@ const Home = () => {
 
     const handleChangeSort = (event: SelectChangeEvent) => {
         setSort(event.target.value as string);
+    };
+
+    const getDistinctCategoriesCount = (shopId: number) => {
+        setLoading(true);
+        ShopService.getDistinctCategoryCount(shopId)
+            .then((count) => setDistinctCategories(count))
+            .finally(() => setLoading(false));
     };
 
     return (
@@ -124,6 +134,8 @@ const Home = () => {
                     display: 'flex',
                     flexDirection: 'row',
                     justifyContent: 'space-between',
+                    alignItems:'center',
+                    gap: 2,
                 }}
             >
                 <FormControl sx={{ minWidth: 200 }}>
@@ -141,17 +153,26 @@ const Home = () => {
                         <MenuItem value="name">Nom</MenuItem>
                         <MenuItem value="createdAt">Date de création</MenuItem>
                         <MenuItem value="nbProducts">Nombre de produits</MenuItem>
+                        <MenuItem value="distinctCategories">Nombre de catégories distinctes</MenuItem>
                     </Select>
                 </FormControl>
 
                 <Filters setUrlFilters={setFilters} setSort={setSort} sort={sort} />
             </Box>
 
+{/* Afficher le nombre de catégories distinctes */}
+            {distinctCategories !== null && (
+                <Typography variant="h6" sx={{ mt: 2 }}>
+                    Nombre de catégories distinctes associées : {distinctCategories}
+                </Typography>
+            )}
+
             {/* Shops */}
             <Grid container alignItems="center" rowSpacing={3} columnSpacing={3}>
                 {shops?.map((shop) => (
                     <Grid item key={shop.id} xs={4}>
-                        <ShopCard shop={shop} />
+                        <ShopCard 
+                        shop={shop} />
                     </Grid>
                 ))}
             </Grid>

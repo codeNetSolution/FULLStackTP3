@@ -28,14 +28,18 @@ import java.util.List;
 })
 @Indexed(index = "idx_shops")
 public class Shop {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "shop_seq")
+    @SequenceGenerator(name = "shop_seq", sequenceName = "shops_id_seq", allocationSize = 1)
+    private long id;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate createdAt;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+
 
     @Column(nullable = false)
     @NotNull(message = "InVacations may not be null")
@@ -52,10 +56,10 @@ public class Shop {
     @Field(type= FieldType.Long)
     private Long nbProducts;
 
-    @OneToMany(cascade = {CascadeType.ALL})
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
     private List<@Valid OpeningHoursShop> openingHours = new ArrayList<OpeningHoursShop>();
 
-    @OneToMany(mappedBy = "shop", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Product> products = new ArrayList<Product>();
 
