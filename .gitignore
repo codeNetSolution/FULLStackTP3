@@ -5,6 +5,9 @@
 /.pnp
 .pnp.js
 
+/TP3/shop-client/.idea/
+/TP3/shop-client/node_modules/
+/TP3/shop-server/.idea/
 # testing
 /coverage
 
